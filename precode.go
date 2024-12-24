@@ -73,8 +73,16 @@ func postTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = json.Unmarshal(buf.Bytes(), &tasks); err != nil {
+	if err = json.Unmarshal(buf.Bytes(), &task); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id := chi.URLParam(r, "id")
+
+	task, ok := tasks[id]
+	if !ok {
+		http.Error(w, "Задание не найдено", http.StatusNoContent)
 		return
 	}
 
