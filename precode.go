@@ -44,14 +44,6 @@ var tasks = map[string]Task{
 // Ниже напишите обработчики для каждого эндпоинта
 // ...
 func getTasks(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-
-	tasks, ok := tasks[id]
-	if !ok {
-		http.Error(w, "Задание не найдено", http.StatusNoContent)
-		return
-	}
-
 	resp, err := json.Marshal(tasks)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -92,6 +84,26 @@ func postTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+func getOneTask(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	tasks, ok := tasks[id]
+	if !ok {
+		http.Error(w, "Задание не найдено", http.StatusNoContent)
+		return
+	}
+
+	resp, err := json.Marshal(tasks)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
+}
+
 func deleteTask(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
@@ -117,7 +129,7 @@ func main() {
 
 	r.Post("/tasks", postTask)
 
-	r.Get("/tasks/{id}", getTasks)
+	r.Get("/tasks/{id}", getOneTask)
 
 	r.Delete("/tasks/{id}", deleteTask)
 
